@@ -18,9 +18,9 @@ class MealScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 450),
+              duration: const Duration(milliseconds: 300),
               transitionBuilder: (child, animation) => RotationTransition(
-                turns: animation,
+                turns: Tween<double>(begin: 0.6, end: 1.0).animate(animation),
                 child: child,
               ),
               child: Icon(
@@ -43,48 +43,53 @@ class MealScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Image.network(
-            meal.imageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 300,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Ingredients',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-          ),
-          const SizedBox(height: 8),
-          ...meal.ingredients
-              .map((ingredient) => Text(
-                    ingredient,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                  ))
-              .toList(),
-          const SizedBox(height: 16),
-          Text(
-            'Steps',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-          ),
-          const SizedBox(height: 8),
-          ...meal.steps
-              .map((step) => Text(
-                    textAlign: TextAlign.center,
-                    step,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                  ))
-              .toList(),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Hero(
+              tag: meal.id,
+              child: Image.network(
+                meal.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 300,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Ingredients',
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            ...meal.ingredients
+                .map((ingredient) => Text(
+                      ingredient,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ))
+                .toList(),
+            const SizedBox(height: 16),
+            Text(
+              'Steps',
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            ...meal.steps
+                .map((step) => Text(
+                      textAlign: TextAlign.center,
+                      step,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ))
+                .toList(),
+          ],
+        ),
       ),
     );
   }
