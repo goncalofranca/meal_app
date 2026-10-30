@@ -5,81 +5,81 @@ import '../providers/filters_provider.dart';
 class FiltersScreen extends ConsumerWidget {
   const FiltersScreen({super.key});
 
+  static const _options = [
+    _FilterOption(Filter.glutenFree, 'Gluten-free',
+        'Only include gluten-free meals', Icons.grain),
+    _FilterOption(Filter.lactoseFree, 'Lactose-free',
+        'Only include lactose-free meals', Icons.water_drop_outlined),
+    _FilterOption(Filter.vegetarian, 'Vegetarian',
+        'Only include vegetarian meals', Icons.egg_alt_outlined),
+    _FilterOption(
+        Filter.vegan, 'Vegan', 'Only include vegan meals', Icons.eco_outlined),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeFilters = ref.watch(filtersProvider);
+    final scheme = Theme.of(context).colorScheme;
+    final matching = ref.watch(filteredMealsProvider).length;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Filters'),
-        ),
-        body: Column(
-          children: [
-            SwitchListTile(
-              value: activeFilters[Filter.glutenFree]!,
-              onChanged: (newValue) {
-                ref
-                    .read(filtersProvider.notifier)
-                    .setFilter(Filter.glutenFree, newValue);
-              },
-              title: Text('Gluten-free',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              subtitle: Text('Only include gluten-free meals',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              activeThumbColor: Theme.of(context).colorScheme.tertiary,
-              contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
+      appBar: AppBar(title: const Text('Filters')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            color: scheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(Icons.restaurant_menu,
+                      color: scheme.onPrimaryContainer),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '$matching ${matching == 1 ? 'meal matches' : 'meals match'} your filters',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                            color: scheme.onPrimaryContainer,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            SwitchListTile(
-              value: activeFilters[Filter.vegetarian]!,
-              onChanged: (newValue) {
-                ref
+          ),
+          const SizedBox(height: 12),
+          for (final option in _options)
+            Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: SwitchListTile(
+                secondary: Icon(option.icon, color: scheme.primary),
+                value: activeFilters[option.filter]!,
+                onChanged: (value) => ref
                     .read(filtersProvider.notifier)
-                    .setFilter(Filter.vegetarian, newValue);
-              },
-              title: Text('Vegetarian',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              subtitle: Text('Only include vegetarian meals',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              activeThumbColor: Theme.of(context).colorScheme.tertiary,
-              contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                    .setFilter(option.filter, value),
+                title: Text(option.title,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontWeight: FontWeight.w700)),
+                subtitle: Text(option.subtitle),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              ),
             ),
-            SwitchListTile(
-              value: activeFilters[Filter.vegan]!,
-              onChanged: (newValue) {
-                ref
-                    .read(filtersProvider.notifier)
-                    .setFilter(Filter.vegan, newValue);
-              },
-              title: Text('Vegan',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              subtitle: Text('Only include vegan meals',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              activeThumbColor: Theme.of(context).colorScheme.tertiary,
-              contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
-            ),
-            SwitchListTile(
-              value: activeFilters[Filter.lactoseFree]!,
-              onChanged: (newValue) {
-                ref
-                    .read(filtersProvider.notifier)
-                    .setFilter(Filter.lactoseFree, newValue);
-              },
-              title: Text('Lactose-free',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              subtitle: Text('Only include lactose-free meals',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface)),
-              activeThumbColor: Theme.of(context).colorScheme.tertiary,
-              contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
-            ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
+}
+
+class _FilterOption {
+  const _FilterOption(this.filter, this.title, this.subtitle, this.icon);
+
+  final Filter filter;
+  final String title;
+  final String subtitle;
+  final IconData icon;
 }

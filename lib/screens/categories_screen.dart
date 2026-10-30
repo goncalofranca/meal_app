@@ -5,85 +5,81 @@ import '../models/meal.dart';
 import '../widgets/category_grid_item.dart';
 import 'meals_screen.dart';
 
-class CategoriesScreen extends StatefulWidget {
+class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key, required this.availableMeals});
 
   final List<Meal> availableMeals;
 
-  @override
-  State<CategoriesScreen> createState() => _CategoriesScreenState();
-}
-
-class _CategoriesScreenState extends State<CategoriesScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-      lowerBound: 0,
-      upperBound: 1,
-    );
-
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _selectCategory(BuildContext context, Category category) {
-    final filteredMeals = widget.availableMeals.where((meal) {
-      return meal.categories.contains(category.id);
-    }).toList();
-
+  void _selectCategory(
+      BuildContext context, Category category, List<Meal> meals) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (ctx) => MealsScreen(
         categoryTitle: category.title,
-        meals: filteredMeals,
+        meals: meals,
       ),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      child: GridView(
-        padding: const EdgeInsets.all(24),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 3 / 2,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-        ),
-        children: [
-          for (final category in categories)
-            CategoryGridItem(
-              onSelectCategory: (context) => _selectCategory(context, category),
-              title: category.title,
-              color: category.color,
-              category: category,
+    final mealsByCategory = <String, List<Meal>>{
+      for (final c in categories) c.id: [],
+    };
+    for (final meal in availableMeals) {
+      for (final id in meal.categories) {
+        mealsByCategory[id]?.add(meal);
+      }
+    }
+
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'What are you craving?',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${availableMeals.length} recipes in ${categories.length} categories',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
             ),
-        ],
-      ),
-      builder: (context, child) => SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.3),
-          end: const Offset(0, 0),
-        ).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeInOut,
           ),
         ),
-        child: child,
-      ),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverGrid.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 260,
+              childAspectRatio: 1.15,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+            ),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              final meals = mealsByCategory[category.id]!;
+              return CategoryGridItem(
+                category: category,
+                mealCount: meals.length,
+                onSelectCategory: () =>
+                    _selectCategory(context, category, meals),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

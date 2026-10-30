@@ -1,91 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:transparent_image/transparent_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/meal.dart';
+import '../providers/favorites_provider.dart';
+import 'meal_image.dart';
 import 'meal_item_trait.dart';
 
-class MealItem extends StatelessWidget {
+class MealItem extends ConsumerWidget {
   const MealItem({super.key, required this.meal, required this.onSelectMeal});
 
   final Meal meal;
-
   final void Function(Meal meal) onSelectMeal;
 
-  String get complexityText {
-    return meal.complexity.name[0].toUpperCase() +
-        meal.complexity.name.substring(1);
-  }
-
-  String get affordabilityText {
-    return meal.affordability.name[0].toUpperCase() +
-        meal.affordability.name.substring(1);
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final isFavorite = ref.watch(isFavoriteProvider(meal.id));
+
     return Card(
-      margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.hardEdge,
-      elevation: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: () => onSelectMeal(meal),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: meal.id,
-              child: FadeInImage(
-                placeholder: MemoryImage(kTransparentImage),
-                image: NetworkImage(meal.imageUrl),
-                fit: BoxFit.cover,
-                height: 200,
-                width: double.infinity,
-              ),
+            Stack(
+              children: [
+                Hero(
+                  tag: meal.id,
+                  child: MealImage(url: meal.imageUrl, height: 190),
+                ),
+                if (isFavorite)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.black54,
+                      child: Icon(Icons.favorite,
+                          size: 18, color: scheme.primary),
+                    ),
+                  ),
+              ],
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                  color: Colors.black54,
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    meal.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 6,
                     children: [
-                      Text(
-                        meal.title,
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      MealItemTrait(
+                        icon: Icons.schedule,
+                        label: '${meal.duration} min',
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          MealItemTrait(
-                            icon: Icons.schedule,
-                            label: '${meal.duration} min',
-                          ),
-                          const SizedBox(width: 12),
-                          MealItemTrait(
-                            icon: Icons.work,
-                            label: complexityText,
-                          ),
-                          const SizedBox(width: 12),
-                          MealItemTrait(
-                            icon: Icons.attach_money,
-                            label: affordabilityText,
-                          ),
-                        ],
+                      MealItemTrait(
+                        icon: Icons.bolt,
+                        label: meal.complexityText,
+                      ),
+                      MealItemTrait(
+                        icon: Icons.payments_outlined,
+                        label: meal.affordabilityText,
                       ),
                     ],
-                  )),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

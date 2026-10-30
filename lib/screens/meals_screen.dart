@@ -8,78 +8,71 @@ class MealsScreen extends StatelessWidget {
     super.key,
     this.categoryTitle,
     required this.meals,
+    this.emptyTitle = 'No meals available',
+    this.emptyMessage = 'Try selecting a different category or filter.',
+    this.emptyIcon = Icons.no_meals,
   });
 
   final String? categoryTitle;
   final List<Meal> meals;
+  final String emptyTitle;
+  final String emptyMessage;
+  final IconData emptyIcon;
 
-  void selectMeal(BuildContext buildcontext, Meal meal) {
-    Navigator.of(buildcontext).push(
-      MaterialPageRoute(
-        builder: (ctx) => MealScreen(
-          meal: meal,
-        ),
-      ),
+  void _selectMeal(BuildContext context, Meal meal) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) => MealScreen(meal: meal)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget content = ListView.builder(
-      itemCount: meals.length,
-      itemBuilder: (ctx, index) {
-        final meal = meals[index];
-        return ListTile(
-          title: Text(meal.title),
-        );
-      },
-    );
+    final scheme = Theme.of(context).colorScheme;
 
-    if (meals.isEmpty) {
-      content = Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'No meals available.',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineLarge!
-                  .copyWith(color: Theme.of(context).colorScheme.onSurface),
+    final Widget content = meals.isEmpty
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(emptyIcon, size: 72, color: scheme.outline),
+                  const SizedBox(height: 16),
+                  Text(
+                    emptyTitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    emptyMessage,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Try selecting a different category.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge!
-                  .copyWith(color: Theme.of(context).colorScheme.onSurface),
+          )
+        : ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: meals.length,
+            itemBuilder: (ctx, index) => MealItem(
+              key: ValueKey(meals[index].id),
+              meal: meals[index],
+              onSelectMeal: (meal) => _selectMeal(context, meal),
             ),
-          ],
-        ),
-      );
-    }
+          );
 
-    if (meals.isNotEmpty) {
-      content = ListView.builder(
-        itemCount: meals.length,
-        itemBuilder: (ctx, index) => MealItem(
-          meal: meals[index],
-          onSelectMeal: (meal) {
-            selectMeal(context, meal);
-          },
-        ),
-      );
-    }
-
-    if (categoryTitle == null) {
-      return content;
-    }
+    if (categoryTitle == null) return content;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(categoryTitle!),
-      ),
+      appBar: AppBar(title: Text(categoryTitle!)),
       body: content,
     );
   }

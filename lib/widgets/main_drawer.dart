@@ -5,70 +5,71 @@ class MainDrawer extends StatelessWidget {
 
   final void Function(String identifier) onSelectScreen;
 
-  // const MainDrawer({super.key, required this.onSelectScreen});
-
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final shape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(14));
     return Drawer(
       child: Column(
         children: [
-          AppBar(
-            title: const Text('Menu'),
-            automaticallyImplyLeading: false,
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+              24,
+              MediaQuery.of(context).padding.top + 32,
+              24,
+              28,
+            ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [scheme.primary, scheme.primaryContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.restaurant_menu, size: 48, color: scheme.onPrimary),
+                const SizedBox(height: 12),
+                Text(
+                  'Cooking Up!',
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        color: scheme.onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                Text(
+                  'Find your next favorite meal',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: scheme.onPrimary.withValues(alpha: 0.8)),
+                ),
+              ],
+            ),
           ),
-          Column(
-            children: [
-              DrawerHeader(
-                padding: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              children: [
+                ListTile(
+                  shape: shape,
+                  leading: const Icon(Icons.restaurant),
+                  title: const Text('Meals'),
+                  onTap: () => onSelectScreen('meals'),
                 ),
-                child: Row(children: [
-                  Icon(
-                    Icons.fastfood,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                  const SizedBox(width: 16),
-                  Text('Cooking Up!',
-                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary)),
-                ]),
-              ),
-              ListTile(
-                leading: Icon(Icons.restaurant,
-                    size: 26, color: Theme.of(context).colorScheme.onSurface),
-                title: Text(
-                  'Meals',
-                  style: Theme.of(context).textTheme.titleSmall,
+                ListTile(
+                  shape: shape,
+                  leading: const Icon(Icons.tune),
+                  title: const Text('Filters'),
+                  onTap: () => onSelectScreen('filters'),
                 ),
-                onTap: () {
-                  onSelectScreen('meals');
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings,
-                    size: 26, color: Theme.of(context).colorScheme.onSurface),
-                title: Text(
-                  'Filters',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                onTap: () {
-                  onSelectScreen('filters');
-                },
-              ),
-            ],
-          )
+              ],
+            ),
+          ),
         ],
       ),
     );
