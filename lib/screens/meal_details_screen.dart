@@ -17,7 +17,17 @@ class MealScreen extends ConsumerWidget {
         title: Text(meal.title),
         actions: [
           IconButton(
-            icon: Icon(isFavorite ? Icons.star : Icons.star_border),
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 450),
+              transitionBuilder: (child, animation) => RotationTransition(
+                turns: animation,
+                child: child,
+              ),
+              child: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                key: ValueKey(isFavorite),
+              ),
+            ),
             onPressed: () {
               ref.read(favoritesProvider.notifier).toggleFavorite(meal);
               final isFavorite = ref.read(favoritesProvider).contains(meal);
